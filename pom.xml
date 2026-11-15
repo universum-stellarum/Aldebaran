@@ -11,8 +11,8 @@
     <groupId>br.api.universum</groupId>
     <artifactId>server-config</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>Universum Config Server</name>
-    <description>Configuração centralizada com isolamento por aplicação e ambiente</description>
+    <name>Aldebaran</name>
+    <description>Spring Cloud Config Server com backend Git e criptografia nativa</description>
     <properties>
         <java.version>21</java.version>
         <spring-cloud.version>2025.1.4</spring-cloud.version>
@@ -32,7 +32,7 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-actuator-test</artifactId>
+            <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

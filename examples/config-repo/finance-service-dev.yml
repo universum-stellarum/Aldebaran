@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres-dev:5432/finance_service
+    username: finance_service_dev
+    # Gere /encrypt no Aldebaran e adicione a senha, por exemplo:
+    # password: '{cipher}COLE_AQUI_O_RESULTADO_DO_ENCRYPT'
+
+universum:
+  message: finance-service-dev
+  api-url: https://finance-service-dev.example.invalid

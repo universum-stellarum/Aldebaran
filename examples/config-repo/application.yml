@@ -1,0 +1,9 @@
+# Copie o conteúdo desta pasta para a raiz de um repositório Git privado.
+# Somente propriedades comuns e não sensíveis.
+logging:
+  level:
+    root: INFO
+
+universum:
+  organization: Universum Digitalis
+  message: Configuração compartilhada

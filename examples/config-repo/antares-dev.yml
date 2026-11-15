@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres-dev:5432/antares
+    username: antares_dev
+    # Gere /encrypt no Aldebaran e adicione a senha, por exemplo:
+    # password: '{cipher}COLE_AQUI_O_RESULTADO_DO_ENCRYPT'
+
+universum:
+  message: antares-dev
+  api-url: https://antares-dev.example.invalid

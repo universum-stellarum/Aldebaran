@@ -89,8 +89,13 @@ class ConfigServerIntegrationTests {
         assertThat(environment.getVersion()).isNotBlank();
         Map<String, Object> properties = merge(environment);
         assertThat(properties).containsEntry("universum.organization", "Universum Digitalis")
-                .containsEntry("universum.message", application + "-" + profile)
-                .containsEntry("spring.datasource.password", "fictitious-" + application + "-" + profile + "-password");
+                .containsEntry("universum.message", application + "-" + profile);
+        if (application.equals("polaris")) {
+            assertThat(properties.keySet()).noneMatch(key -> key.startsWith("spring.datasource."));
+        } else {
+            assertThat(properties).containsEntry("spring.datasource.password",
+                    "fictitious-" + application + "-" + profile + "-password");
+        }
         assertThat(response.body()).doesNotContain("{cipher}", PASSWORD, "study-only-git-token",
                 LocalConfigRepository.ENCRYPTION_KEY, "spring.security.user.password");
     }

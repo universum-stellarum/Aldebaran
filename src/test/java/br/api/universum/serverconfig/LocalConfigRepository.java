@@ -30,7 +30,7 @@ final class LocalConfigRepository implements AutoCloseable {
             for (Path example : examples.toList()) {
                 String content = Files.readString(example);
                 String name = example.getFileName().toString();
-                if (!name.equals("application.yml")) {
+                if (content.contains("  datasource:")) {
                     String applicationAndProfile = name.substring(0, name.length() - ".yml".length());
                     String encrypted = encryptor.encrypt("fictitious-" + applicationAndProfile + "-password");
                     content += "\nspring.datasource.password: '{cipher}" + encrypted + "'\n";

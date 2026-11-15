@@ -67,6 +67,7 @@ finance-service-prod.yml
 
 Os exemplos usam valores fictícios, URLs `.invalid` e comentários explicando onde inserir
 senhas criptografadas. Não contêm segredos reais nem ciphertext utilizável.
+O Polaris é o Spring Cloud Gateway e seus exemplos não incluem datasource próprio.
 Substitua os parâmetros conforme seu laboratório e faça commit/push na branch `main`.
 
 `application.yml` tem propriedades comuns e não sensíveis.

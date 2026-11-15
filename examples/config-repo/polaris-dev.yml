@@ -1,10 +1,4 @@
-spring:
-  datasource:
-    url: jdbc:postgresql://postgres-dev:5432/polaris
-    username: polaris_dev
-    # Gere /encrypt no Aldebaran e adicione a senha, por exemplo:
-    # password: '{cipher}COLE_AQUI_O_RESULTADO_DO_ENCRYPT'
-
+# Polaris é o Spring Cloud Gateway e não possui datasource próprio.
 universum:
   message: polaris-dev
   api-url: https://polaris-dev.example.invalid

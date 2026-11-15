@@ -5,6 +5,8 @@ services:
       context: .
     restart: unless-stopped
     environment:
+      HOME: /tmp
+      JAVA_TOOL_OPTIONS: "-Duser.home=/tmp"
       SERVER_PORT: ${SERVER_PORT:-8888}
       CONFIG_GIT_URI: ${CONFIG_GIT_URI:?Informe a URL HTTPS do repositório privado}
       CONFIG_GIT_USERNAME: ${CONFIG_GIT_USERNAME:?Informe o usuário do Git}

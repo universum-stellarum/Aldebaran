@@ -1,80 +1,93 @@
-# Verificações executadas
+# Verificação da refatoração do Aldebaran
 
-Execução local em 14/11/2026. Nenhuma credencial real foi usada. Os testes Docker geram
-senhas, hashes e segredos descartáveis e removem seus containers e redes.
+Resultados executados em 15/11/2026. Todos os valores usados nos testes são fictícios.
 
-| Verificação | Resultado observado |
+## Resultados
+
+| Verificação | Resultado |
 | --- | --- |
-| Java local | Oracle JDK 21.0.12 |
-| Maven Wrapper `mvnw.cmd -q verify` no Windows | 134 casos: 133 aprovados, 1 ignorado por ser específico de Linux; zero falhas/erros |
-| `docker build -t universum-config-server:verification .` | BUILD SUCCESS |
-| Maven `verify` dentro do estágio Docker Linux | 134 aprovados; zero falhas, erros ou skips |
-| `python scripts/docker-smoke.py universum-config-server:verification` | Concluído com sucesso |
-| `docker compose config --format json` em ambientes descartáveis | Validado sem impressão de credenciais |
-| Compilação Java 21 de `scripts/HashPassword.java` | Aprovada |
-| `python -m py_compile scripts/docker-smoke.py` | Aprovada |
+| `mvnw.cmd -q clean verify`, Java 21.0.12 no Windows | 24 testes aprovados; zero falhas, erros ou skips |
+| `docker build -t aldebaran:verification .` | BUILD SUCCESS |
+| `mvn verify` no estágio Linux do Dockerfile | 24 testes aprovados; zero falhas, erros ou skips |
+| Execução real de uma instância pelo Compose | Aprovada |
+| Compose sem `CONFIG_SERVER_BIND_IP` | Recusado, sem fallback para todas as interfaces |
 | `git diff --check` | Sem erros de whitespace |
 
-## Cobertura Maven
+A suíte cobre o backend Git oficial com clone real por TCP loopback e branch main,
+configurações comuns e específicas de Antares, Polaris e Finance em DEV/PROD,
+precedência, perfil default, perfis múltiplos, labels, formatos YAML/Properties e atualização por fetch.
 
-- Inicialização DEV/PROD; rejeição de ambiente ausente, inválido ou com espaços.
-- Cadastro obrigatório, completo, nomes seguros, hashes bcrypt e usuários únicos sem distinguir capitalização.
-- HTTP Basic real: credenciais válidas, ausentes e incorretas.
-- Autorização por aplicação, acesso cruzado e isolamento dos perfis.
-- Perfis combinados, labels, métodos de escrita, formatos alternativos, queries e caminhos codificados/traversal.
-- Endpoint oficial Environment em JSON normal e na representação V2.
-- Resolução de segredos, tipos YAML, precedência de configurações globais/específicas.
-- Placeholder obrigatório ausente, namespace de outro serviço e variáveis internas.
-- Ausência de segredos nos erros e logs capturados.
-- Imports, metadados de ativação de perfil, múltiplos documentos YAML, variantes de arquivos e symlinks.
-- Rejeição pelo repositório antes de qualquer acesso a arquivos ou resolução de segredos.
-- Aplicação cadastrada sem arquivo retornando 404, sem fallback para somente o global.
-- Health check público com status mínimo.
-- Spring Cloud Config Client real com import obrigatório, perfil explícito e falha com credenciais erradas.
-- Comportamento real do Native 5.0.6 mantendo placeholders antes da decoração.
+Os arquivos de teste recebem ciphertext produzido com a API oficial de criptografia.
+As respostas HTTP contêm o valor descriptografado. Os endpoints administrativos normais
+e suas variantes exigem HTTP Basic; o round-trip encrypt/decrypt foi verificado.
 
-O teste de symlink é executado somente no Linux para não exigir privilégios de criação
-de links no Windows. Foi aprovado dentro do build Docker.
+Um Config Client real é iniciado em outra JVM para cada perfil usando somente:
+`SPRING_APPLICATION_NAME`, `SPRING_PROFILES_ACTIVE` e `SPRING_CONFIG_IMPORT`.
+Foram aprovados o consumo de configurações/segredos e a falha de inicialização com
+servidor indisponível, sem optional.
 
-## Testes Docker e Compose
+A fixture de Git e o pequeno probe de cliente existem somente em src/test.
+Nenhum código de teste é empacotado como código da aplicação.
 
-As duas instâncias foram iniciadas pelo **Compose real**, com a mesma imagem, ambientes distintos,
-redes descartáveis e portas aleatórias publicadas somente em 127.0.0.1 para as verificações.
+## Verificação do container
 
-Resultados em DEV e PROD:
+Foi iniciada uma única instância da imagem final pelo Compose, com:
 
-- HTTP **200** na consulta da própria aplicação, com segredo resolvido do ambiente real do processo.
-- HTTP **401** sem autenticação, com senha inválida ou com identidade PROD tentando autenticar no DEV.
-- HTTP **403** para outra aplicação, outro perfil, perfis combinados, label, YAML, recursos e Actuator não permitido.
-- HTTP **404** para aplicação cadastrada sem YAML próprio.
-- Nenhum segredo financeiro na resposta do auth-service; nenhum segredo PROD na resposta DEV.
-- Hashes bcrypt e segredos contendo cifrão preservados pelo `env_file.format: raw`.
-- Usuário `10001:10001`, filesystem somente leitura e porta interna configurável.
-- Health check executado dentro do container; ambos chegaram ao estado Docker **healthy**.
-- Sem senha de bootstrap, hash ou segredos de banco nos logs dos containers.
-- Inicialização recusada com ambiente inválido e cadastro de segurança ausente.
-- Todos os containers e redes criados pelo teste foram removidos.
+- IP de publicação **127.0.0.1 somente para este teste local**, porta temporária e rede descartável.
+- Um servidor Git temporário na rede isolada, sem porta publicada, contendo apenas os dados fictícios da suíte.
+- Credenciais administrativas descartáveis e a chave de teste injetadas pelo ambiente real do processo.
 
-A saída de `docker compose config` escapa cifrões para `$$` ao serializar o modelo.
-O teste verifica essa representação e, separadamente, o valor literal efetivamente recebido pelo Java.
+Observado:
 
-## Evidências locais e reprodução
+- Leitura sem Basic em `/antares/dev`, `/antares/prod` e `/antares/default`.
+- Propriedades globais e específicas combinadas, com senhas descriptografadas.
+- HTTP 401 em encrypt/decrypt sem credenciais; round-trip administrativo correto com senha contendo cifrão.
+- Binding nativo de `ENCRYPT_KEY`, sem placeholder ou código Java de resolução.
+- Clone/cache Git existente em `/tmp/aldebaran-config-git/.git`, dentro do tmpfs.
+- Root filesystem somente leitura e usuário `10001:10001`.
+- Ausência de /app/config e /app/examples na imagem final.
+- Health check interno aprovado e estado Docker **healthy**.
+- Chave e senha administrativa ausentes dos logs capturados.
+- Containers e rede temporários removidos ao terminar.
 
-Os logs locais estão em `target/verify.log`, `target/docker-build.log`,
-`target/docker-smoke.log` e os relatórios JUnit em `target/surefire-reports/`.
-São artefatos ignorados pelo Git, regeneráveis pelos comandos documentados no README.
+## Alterações no repositório
 
-A imagem final validada foi criada com o nome local `universum-config-server:verification`.
-Nenhuma imagem foi enviada a registry, nenhum deploy foi feito no Dokploy e nenhum domínio real foi configurado.
+Removidos os componentes ClientRegistry, ServerEnvironment, RuntimeConfiguration,
+NativeRepositoryConfiguration, RequestPolicy, AuthorizedEnvironmentRepository,
+ConfigurationFiles, SecretResolver e DistributionException.
 
-## Limites das verificações
+Também removidos:
 
-O ambiente Dokploy real, DNS, certificados HTTPS e políticas do proxy/firewall ainda dependem da
-implantação do operador. Os testes usam HTTP em loopback/rede Docker controlada.
-Não foram testadas integrações de negócio com PostgreSQL, Redis, Kafka ou provedores externos,
-pois o Config Server distribui suas propriedades e não se conecta a esses serviços.
+- `src/main/resources/universum-server.yml`.
+- Os quatro YAMLs de distribuição antes presentes em `config/`.
+- `scripts/HashPassword.java` e `scripts/docker-smoke.py`.
+- Os dez arquivos dos testes anteriores: ConfigurationFilesTests, ConfigurationValidationTests,
+  DevHttpTests, DockerSmokeCredentials, HttpContract, IntegrationFixture, NativeBehaviorTests,
+  ProdHttpTests, RepositoryAuthorizationTests e SecretResolverTests.
 
-O health check valida o processo, sem garantir a presença de todos os segredos de todas as aplicações.
-Não há HA, refresh distribuído ou rotação automática. Cada instância deve receber exclusivamente
-os valores do ambiente correto; um valor PROD inserido manualmente no namespace DEV não pode
-ser identificado pelo código como pertencente a outro ambiente.
+Criados ou reformulados:
+
+- Classe principal convencional e SecurityConfiguration mínima.
+- `src/main/resources/application.yml` com Git, credenciais administrativas e Actuator.
+- Sete YAMLs de exemplo em `examples/config-repo/`.
+- ConfigServerIntegrationTests, LocalConfigRepository e ConfigClientProbe.
+- POM, Dockerfile, compose.yml, .env.example, README e este relatório.
+
+As dependências de produção continuam oficiais: Config Server, Security e Actuator.
+Os testes usam starter-test e Config Client. Não há implementação própria de backend,
+criptografia, resolução de placeholders ou cadastro de clientes.
+
+## Evidências e limites
+
+Logs locais ignorados pelo Git: `refactor-test.log`, `refactor-docker-build.log`
+e `refactor-container.log`. Relatórios JUnit: `target/surefire-reports/`.
+Os comandos Maven e Docker podem ser repetidos conforme o README.
+
+Não foram usados GitHub privado, token real ou uma interface Tailscale real do servidor de implantação.
+O transporte Git de teste foi TCP privado local, sem HTTPS/autenticação do GitHub.
+Portanto não foram validados as permissões do token real, o TLS desse remoto, as ACLs da
+tailnet ou o trajeto Docker → IP Tailscale no Linux de implantação. Esses passos estão no README.
+
+Nenhum repositório remoto, domínio ou deploy Dokploy foi criado.
+O limite de segurança da leitura é a infraestrutura privada: qualquer cliente que alcance
+a API pode consultar outras aplicações e ambientes, como previsto para este laboratório.

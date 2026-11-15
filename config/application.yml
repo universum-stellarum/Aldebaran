@@ -1,0 +1,14 @@
+# Somente propriedades públicas compartilhadas. Placeholders são proibidos neste arquivo.
+logging:
+  level:
+    root: INFO
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+universum:
+  organization: Universum Digitalis
+  http:
+    connect-timeout: 5s
+    read-timeout: 15s

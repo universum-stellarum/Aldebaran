@@ -1,0 +1,12 @@
+spring:
+  kafka:
+    bootstrap-servers: ${DIST_NOTIFICATION_SERVICE_KAFKA_BOOTSTRAP_SERVERS}
+    properties:
+      security.protocol: SASL_SSL
+      sasl.mechanism: PLAIN
+      sasl.jaas.config: ${DIST_NOTIFICATION_SERVICE_KAFKA_JAAS_CONFIG}
+universum:
+  delivery:
+    max-attempts: 3
+    provider-url: ${DIST_NOTIFICATION_SERVICE_PROVIDER_URL}
+    api-key: ${DIST_NOTIFICATION_SERVICE_PROVIDER_API_KEY}

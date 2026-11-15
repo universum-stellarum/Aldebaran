@@ -1,25 +1,27 @@
 services:
   config-server:
-    image: ${CONFIG_SERVER_IMAGE:-universum-config-server:local}
+    image: aldebaran:local
     build:
       context: .
     restart: unless-stopped
-    # Dokploy writes these deployment-specific values into .env beside compose.yml.
-    # raw preserves $ in bcrypt hashes and secrets (Docker Compose >= 2.30).
-    env_file:
-      - path: .env
-        required: true
-        format: raw
     environment:
-      APP_ENV: ${APP_ENV:?APP_ENV must be dev or prod}
       SERVER_PORT: ${SERVER_PORT:-8888}
-    expose:
-      - "${SERVER_PORT:-8888}"
-    networks:
-      - dokploy-network
+      CONFIG_GIT_URI: ${CONFIG_GIT_URI:?Informe a URL HTTPS do repositório privado}
+      CONFIG_GIT_USERNAME: ${CONFIG_GIT_USERNAME:?Informe o usuário do Git}
+      CONFIG_GIT_TOKEN: ${CONFIG_GIT_TOKEN:?Informe o token do Git}
+      CONFIG_GIT_DEFAULT_LABEL: ${CONFIG_GIT_DEFAULT_LABEL:-main}
+      ENCRYPT_KEY: ${ENCRYPT_KEY:?Informe a chave de criptografia}
+      CONFIG_ADMIN_USERNAME: ${CONFIG_ADMIN_USERNAME:?Informe o usuário administrativo}
+      CONFIG_ADMIN_PASSWORD: ${CONFIG_ADMIN_PASSWORD:?Informe a senha administrativa}
+    ports:
+      - target: ${SERVER_PORT:-8888}
+        published: "${SERVER_PORT:-8888}"
+        host_ip: ${CONFIG_SERVER_BIND_IP:?Informe o IP da interface Tailscale do host}
+        protocol: tcp
     read_only: true
+    # JVM e clone/cache Git precisam de um diretório gravável; perdido ao recriar o container.
     tmpfs:
-      - /tmp:size=128m,mode=1777
+      - /tmp:size=256m,mode=1777
     cap_drop:
       - ALL
     security_opt:
@@ -30,6 +32,3 @@ services:
       timeout: 5s
       start_period: 60s
       retries: 3
-networks:
-  dokploy-network:
-    external: true

@@ -31,3 +31,11 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Runtime secrets
+.env
+.env.*
+!.env.example
+*.log
+__pycache__/
+*.pyc

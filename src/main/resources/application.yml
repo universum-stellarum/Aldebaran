@@ -1,25 +1,36 @@
 spring:
   application:
     name: aldebaran
+
   security:
     user:
       name: ${CONFIG_ADMIN_USERNAME}
       password: ${CONFIG_ADMIN_PASSWORD}
       roles: ADMIN
+
   cloud:
     config:
       server:
         accept-empty: false
+
+        health:
+          repositories:
+            antares:
+              name: antares
+              profiles: dev
+
         git:
           uri: ${CONFIG_GIT_URI}
           username: ${CONFIG_GIT_USERNAME}
           password: ${CONFIG_GIT_TOKEN}
-          default-label: ${CONFIG_GIT_DEFAULT_LABEL:main}
+          default-label: ${CONFIG_GIT_DEFAULT_LABEL}
           try-master-branch: false
           clone-on-start: true
           basedir: ${java.io.tmpdir}/aldebaran-config-git
+
   mvc:
     log-request-details: false
+
   web:
     error:
       include-message: never
@@ -34,6 +45,7 @@ management:
     web:
       exposure:
         include: health
+
   endpoint:
     health:
       probes:

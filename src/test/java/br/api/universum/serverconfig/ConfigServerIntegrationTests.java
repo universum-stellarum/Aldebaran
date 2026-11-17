@@ -57,6 +57,7 @@ class ConfigServerIntegrationTests {
         properties.add("CONFIG_GIT_URI", REPOSITORY::uri);
         properties.add("CONFIG_GIT_USERNAME", () -> "study-git-user");
         properties.add("CONFIG_GIT_TOKEN", () -> "study-only-git-token");
+        properties.add("CONFIG_GIT_DEFAULT_LABEL", () -> "main");
         properties.add("CONFIG_ADMIN_USERNAME", () -> ADMIN);
         properties.add("CONFIG_ADMIN_PASSWORD", () -> PASSWORD);
         properties.add("spring.cloud.config.server.git.basedir", REPOSITORY::cacheDirectory);

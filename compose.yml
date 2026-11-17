@@ -4,32 +4,38 @@ services:
     build:
       context: .
     restart: unless-stopped
+
     environment:
       HOME: /tmp
       JAVA_TOOL_OPTIONS: "-Duser.home=/tmp"
-      SERVER_PORT: ${SERVER_PORT:-8888}
-      CONFIG_GIT_URI: ${CONFIG_GIT_URI:?Informe a URL HTTPS do repositório privado}
-      CONFIG_GIT_USERNAME: ${CONFIG_GIT_USERNAME:?Informe o usuário do Git}
-      CONFIG_GIT_TOKEN: ${CONFIG_GIT_TOKEN:?Informe o token do Git}
-      CONFIG_GIT_DEFAULT_LABEL: ${CONFIG_GIT_DEFAULT_LABEL:-main}
-      ENCRYPT_KEY: ${ENCRYPT_KEY:?Informe a chave de criptografia}
-      CONFIG_ADMIN_USERNAME: ${CONFIG_ADMIN_USERNAME:?Informe o usuário administrativo}
-      CONFIG_ADMIN_PASSWORD: ${CONFIG_ADMIN_PASSWORD:?Informe a senha administrativa}
+      SERVER_PORT: ${SERVER_PORT}
+      CONFIG_GIT_URI: ${CONFIG_GIT_URI}
+      CONFIG_GIT_USERNAME: ${CONFIG_GIT_USERNAME}
+      CONFIG_GIT_TOKEN: ${CONFIG_GIT_TOKEN}
+      CONFIG_GIT_DEFAULT_LABEL: ${CONFIG_GIT_DEFAULT_LABEL}
+      ENCRYPT_KEY: ${ENCRYPT_KEY}
+      CONFIG_ADMIN_USERNAME: ${CONFIG_ADMIN_USERNAME}
+      CONFIG_ADMIN_PASSWORD: ${CONFIG_ADMIN_PASSWORD}
+
     ports:
-      - target: ${SERVER_PORT:-8888}
-        published: "${SERVER_PORT:-8888}"
-        host_ip: ${CONFIG_SERVER_BIND_IP:?Informe o IP da interface Tailscale do host}
+      - target: ${SERVER_PORT}
+        published: "${SERVER_PORT}"
+        host_ip: ${CONFIG_SERVER_BIND_IP}
         protocol: tcp
+
     read_only: true
-    # JVM e clone/cache Git precisam de um diretório gravável; perdido ao recriar o container.
+
     tmpfs:
       - /tmp:size=256m,mode=1777
+
     cap_drop:
       - ALL
+
     security_opt:
       - no-new-privileges:true
+
     healthcheck:
-      test: ["CMD", "/bin/bash", "/app/healthcheck.sh"]
+      test: [ "CMD", "/bin/bash", "/app/healthcheck.sh" ]
       interval: 30s
       timeout: 5s
       start_period: 60s

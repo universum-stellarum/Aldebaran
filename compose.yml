@@ -17,11 +17,10 @@ services:
       CONFIG_ADMIN_USERNAME: ${CONFIG_ADMIN_USERNAME}
       CONFIG_ADMIN_PASSWORD: ${CONFIG_ADMIN_PASSWORD}
 
-    ports:
-      - target: ${SERVER_PORT}
-        published: "${SERVER_PORT}"
-        host_ip: ${CONFIG_SERVER_BIND_IP}
-        protocol: tcp
+    # Sem "ports": nada é publicado no host. O Traefik do Dokploy alcança
+    # o container pela rede Docker e roteia o domínio para esta porta interna.
+    expose:
+      - "${SERVER_PORT}"
 
     read_only: true
 

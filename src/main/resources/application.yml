@@ -36,6 +36,10 @@ spring:
       include-message: never
       include-stacktrace: never
 
+universum:
+  request-log:
+    enabled: ${REQUEST_LOG_ENABLED:true}
+
 server:
   port: ${SERVER_PORT:8888}
   forward-headers-strategy: none

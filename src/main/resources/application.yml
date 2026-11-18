@@ -15,8 +15,8 @@ spring:
 
         health:
           repositories:
-            antares:
-              name: antares
+            identity:
+              name: identity
               profiles: dev
 
         git:

@@ -1,0 +1,4 @@
+# O gateway é o Spring Cloud Gateway e não possui datasource próprio.
+universum:
+  message: gateway-prod
+  api-url: https://gateway-prod.example.invalid

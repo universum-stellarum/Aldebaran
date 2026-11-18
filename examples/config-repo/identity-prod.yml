@@ -6,5 +6,5 @@ spring:
     # password: '{cipher}COLE_AQUI_O_RESULTADO_DO_ENCRYPT'
 
 universum:
-  message: antares-prod
-  api-url: https://antares-prod.example.invalid
+  message: identity-prod
+  api-url: https://identity-prod.example.invalid

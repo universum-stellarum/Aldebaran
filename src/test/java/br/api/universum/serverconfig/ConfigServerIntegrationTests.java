@@ -80,7 +80,7 @@ class ConfigServerIntegrationTests {
     }
 
     @ParameterizedTest
-    @CsvSource({"antares,dev", "antares,prod", "polaris,dev", "polaris,prod",
+    @CsvSource({"identity,dev", "identity,prod", "gateway,dev", "gateway,prod",
             "finance-service,dev", "finance-service,prod"})
     void servesAllApplicationsAndEnvironmentsWithoutAuthentication(String application, String profile) throws Exception {
         var response = get("/" + application + "/" + profile);
@@ -91,7 +91,7 @@ class ConfigServerIntegrationTests {
         Map<String, Object> properties = merge(environment);
         assertThat(properties).containsEntry("universum.organization", "Universum Digitalis")
                 .containsEntry("universum.message", application + "-" + profile);
-        if (application.equals("polaris")) {
+        if (application.equals("gateway")) {
             assertThat(properties.keySet()).noneMatch(key -> key.startsWith("spring.datasource."));
         } else {
             assertThat(properties).containsEntry("spring.datasource.password",
@@ -103,7 +103,7 @@ class ConfigServerIntegrationTests {
 
     @Test
     void acceptsDefaultProfileDuringConfigDataBootstrap() throws Exception {
-        var response = get("/antares/default");
+        var response = get("/identity/default");
         assertThat(response.statusCode()).isEqualTo(200);
         Map<String, Object> properties = merge(new JsonMapper().readValue(response.body(), Environment.class));
         assertThat(properties).containsEntry("universum.organization", "Universum Digitalis")
@@ -112,20 +112,20 @@ class ConfigServerIntegrationTests {
 
     @Test
     void usesOfficialLabelProfileAndPrecedenceRules() throws Exception {
-        var response = get("/antares/dev,prod/main");
+        var response = get("/identity/dev,prod/main");
         assertThat(response.statusCode()).isEqualTo(200);
         Map<String, Object> properties = merge(new JsonMapper().readValue(response.body(), Environment.class));
-        assertThat(properties).containsEntry("universum.message", "antares-prod");
+        assertThat(properties).containsEntry("universum.message", "identity-prod");
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"/antares-dev.yml", "/antares-prod.properties"})
+    @ValueSource(strings = {"/identity-dev.yml", "/identity-prod.properties"})
     void supportsOfficialAlternativeRepresentations(String path) throws Exception {
         assertThat(get(path).statusCode()).isEqualTo(200);
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"/encrypt", "/decrypt", "/encrypt/antares/dev", "/decrypt/antares/prod"})
+    @ValueSource(strings = {"/encrypt", "/decrypt", "/encrypt/identity/dev", "/decrypt/identity/prod"})
     void protectsEveryAdministrativeVariant(String path) throws Exception {
         assertThat(post(path, "fictitious-input", null).statusCode()).isEqualTo(401);
         assertThat(post(path, "fictitious-input", "incorrect-password").statusCode()).isEqualTo(401);
@@ -135,11 +135,11 @@ class ConfigServerIntegrationTests {
     void protectsEncryptionStatusAndKeyEndpoints() throws Exception {
         assertThat(get("/encrypt/status").statusCode()).isEqualTo(401);
         assertThat(get("/key").statusCode()).isEqualTo(401);
-        assertThat(get("/key/antares/dev").statusCode()).isEqualTo(401);
+        assertThat(get("/key/identity/dev").statusCode()).isEqualTo(401);
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"", "/antares/dev"})
+    @ValueSource(strings = {"", "/identity/dev"})
     void encryptsAndDecryptsUsingOfficialEndpoints(String suffix) throws Exception {
         String plain = "fictitious-value-with-+-$-and-spaces";
         var encrypted = post("/encrypt" + suffix, plain, PASSWORD);
@@ -152,9 +152,9 @@ class ConfigServerIntegrationTests {
 
     @Test
     void fetchesPublishedGitChangesWithoutRestartingServer() throws Exception {
-        var before = new JsonMapper().readValue(get("/antares/dev").body(), Environment.class);
+        var before = new JsonMapper().readValue(get("/identity/dev").body(), Environment.class);
         REPOSITORY.update();
-        var after = new JsonMapper().readValue(get("/antares/dev").body(), Environment.class);
+        var after = new JsonMapper().readValue(get("/identity/dev").body(), Environment.class);
         assertThat(after.getVersion()).isNotEqualTo(before.getVersion());
         assertThat(merge(after)).containsEntry("study-update", "published");
     }
@@ -168,9 +168,9 @@ class ConfigServerIntegrationTests {
 
     @Test
     void doesNotLogCredentialsOrDecryptedValues(CapturedOutput output) throws Exception {
-        assertThat(get("/antares/prod").statusCode()).isEqualTo(200);
+        assertThat(get("/identity/prod").statusCode()).isEqualTo(200);
         assertThat(output.getAll()).doesNotContain(PASSWORD, LocalConfigRepository.ENCRYPTION_KEY,
-                "study-only-git-token", "fictitious-antares-prod-password");
+                "study-only-git-token", "fictitious-identity-prod-password");
     }
 
     @ParameterizedTest
@@ -178,7 +178,7 @@ class ConfigServerIntegrationTests {
     void realClientNeedsOnlyThreeEnvironmentVariables(String profile) throws Exception {
         var result = runClient(profile, "http://127.0.0.1:" + port);
         assertThat(result.exitCode()).as("Veja o log do cliente em %s", result.log()).isZero();
-        assertThat(Files.readString(result.log())).contains("CONFIG_CLIENT_OK application=antares profile=" + profile);
+        assertThat(Files.readString(result.log())).contains("CONFIG_CLIENT_OK application=identity profile=" + profile);
     }
 
     @Test
@@ -204,7 +204,7 @@ class ConfigServerIntegrationTests {
                 .collect(java.util.stream.Collectors.joining(java.io.File.pathSeparator));
         var builder = new ProcessBuilder(javaExecutable, "-cp", classpath, "br.api.universum.configclient.ConfigClientProbe")
                 .redirectErrorStream(true).redirectOutput(log.toFile());
-        builder.environment().put("SPRING_APPLICATION_NAME", "antares");
+        builder.environment().put("SPRING_APPLICATION_NAME", "identity");
         builder.environment().put("SPRING_PROFILES_ACTIVE", profile);
         builder.environment().put("SPRING_CONFIG_IMPORT", "configserver:" + url);
         var process = builder.start();

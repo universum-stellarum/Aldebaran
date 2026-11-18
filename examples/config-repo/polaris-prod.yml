@@ -1,4 +1,0 @@
-# Polaris é o Spring Cloud Gateway e não possui datasource próprio.
-universum:
-  message: polaris-prod
-  api-url: https://polaris-prod.example.invalid

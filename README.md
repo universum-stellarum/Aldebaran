@@ -17,7 +17,7 @@ As versões são gerenciadas pelo parent do Boot e pelo BOM do Cloud, mantendo a
 ```text
 IntelliJ / microserviços Docker
              │
-             │ HTTP pela rede privada — /antares/dev ou /antares/prod
+             │ HTTP pela rede privada — /identity/dev ou /identity/prod
              ▼
      Aldebaran :8888
              │
@@ -62,10 +62,10 @@ Crie um repositório Git privado separado do código do Aldebaran e copie os arq
 
 ```text
 application.yml
-antares-dev.yml
-antares-prod.yml
-polaris-dev.yml
-polaris-prod.yml
+identity-dev.yml
+identity-prod.yml
+gateway-dev.yml
+gateway-prod.yml
 finance-service-dev.yml
 finance-service-prod.yml
 ```
@@ -76,12 +76,12 @@ O Polaris é o Spring Cloud Gateway e seus exemplos não incluem datasource pró
 Substitua os parâmetros conforme seu laboratório e faça commit/push na branch `main`.
 
 `application.yml` tem propriedades comuns e não sensíveis.
-Para `/antares/dev`, o Spring combina o global com `antares-dev.yml`;
+Para `/identity/dev`, o Spring combina o global com `identity-dev.yml`;
 o arquivo específico tem maior prioridade. Arquivos `application-dev.yml` ou
-`antares.yml` também podem ser usados conforme as regras oficiais.
+`identity.yml` também podem ser usados conforme as regras oficiais.
 Perfis múltiplos, labels e formatos YAML/Properties continuam disponíveis.
 
-`GET /antares/default` é permitido: o Config Data faz essa consulta inicial antes de buscar
+`GET /identity/default` é permitido: o Config Data faz essa consulta inicial antes de buscar
 o perfil ativo. Não é necessário forçar `spring.cloud.config.profile` no cliente.
 
 `accept-empty=false` retorna 404 quando nenhuma fonte é encontrada.
@@ -184,7 +184,7 @@ No host, confirme a publicação específica sem imprimir as variáveis secretas
 ```bash
 docker inspect "$(docker compose ps -q config-server)" --format '{{json .HostConfig.PortBindings}}'
 curl --fail http://SEU_IP_TAILSCALE:8888/actuator/health
-curl --fail http://SEU_IP_TAILSCALE:8888/antares/dev
+curl --fail http://SEU_IP_TAILSCALE:8888/identity/dev
 ```
 
 Repita o curl no computador conectado à Tailscale antes de iniciar o cliente no IntelliJ.
@@ -247,7 +247,7 @@ spring:
     password: '{cipher}COLE_AQUI_O_CIPHERTEXT_REAL'
 ```
 
-Faça commit/push no repositório privado e consulte `/antares/dev`.
+Faça commit/push no repositório privado e consulte `/identity/dev`.
 A resposta contém a senha em texto claro; confira em terminal privado.
 O cliente não precisa de `ENCRYPT_KEY`.
 
@@ -267,7 +267,7 @@ e o BOM Cloud compatível com seu Spring Boot. Não adicione a dependência de *
 No IntelliJ, preencha as variáveis da Run Configuration:
 
 ```dotenv
-SPRING_APPLICATION_NAME=antares
+SPRING_APPLICATION_NAME=identity
 SPRING_PROFILES_ACTIVE=dev
 SPRING_CONFIG_IMPORT=configserver:http://SEU_IP_TAILSCALE:8888
 ```
@@ -280,7 +280,7 @@ Em Docker, encaminhe explicitamente as mesmas três variáveis ao processo do mi
 
 ```yaml
 environment:
-  SPRING_APPLICATION_NAME: antares
+  SPRING_APPLICATION_NAME: identity
   SPRING_PROFILES_ACTIVE: dev
   SPRING_CONFIG_IMPORT: configserver:http://SEU_IP_TAILSCALE:8888
 ```
@@ -293,9 +293,9 @@ Nomes e aliases Docker não definem o perfil Spring.
 Exemplos de consultas sem credenciais:
 
 ```bash
-curl --fail http://SEU_IP_TAILSCALE:8888/antares/dev
-curl --fail http://SEU_IP_TAILSCALE:8888/antares/prod
-curl --fail http://SEU_IP_TAILSCALE:8888/polaris/dev
+curl --fail http://SEU_IP_TAILSCALE:8888/identity/dev
+curl --fail http://SEU_IP_TAILSCALE:8888/identity/prod
+curl --fail http://SEU_IP_TAILSCALE:8888/gateway/dev
 ```
 
 ## Atualizações e limites

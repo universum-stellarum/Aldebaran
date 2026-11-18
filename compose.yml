@@ -17,8 +17,6 @@ services:
       CONFIG_ADMIN_USERNAME: ${CONFIG_ADMIN_USERNAME}
       CONFIG_ADMIN_PASSWORD: ${CONFIG_ADMIN_PASSWORD}
 
-    # Sem "ports": nada é publicado no host. O Traefik do Dokploy alcança
-    # o container pela rede Docker e roteia o domínio para esta porta interna.
     expose:
       - "${SERVER_PORT}"
 
@@ -39,3 +37,17 @@ services:
       timeout: 5s
       start_period: 60s
       retries: 3
+
+    networks:
+      universum-dev:
+        aliases:
+          - config-server
+      universum-prod:
+        aliases:
+          - config-server
+
+networks:
+  universum-dev:
+    external: true
+  universum-prod:
+    external: true

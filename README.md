@@ -1,5 +1,10 @@
 # Aldebaran
 
+> **Aldebaran** é uma gigante laranja que fica a cerca de 65 anos-luz da Terra. Seu nome vem
+> do árabe *al-Dabarān*, "o seguidor": ela parece seguir o aglomerado das Plêiades pelo céu.
+> Apesar disso, não faz parte do aglomerado das Híades, com o qual costuma ser confundida,
+> e é uma das estrelas mais brilhantes da constelação de Touro.
+
 Um Spring Cloud Config Server para estudos: **uma instância**, um repositório Git privado
 e os perfis `dev` e `prod` dos microserviços. A API é publicada somente no IP privado da
 Tailscale do servidor Linux.
